@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, Copy, FileAudio, Loader2, Mic, Square, Upload } from 'lucide-react';
 import { formatDuration } from '../utils/audioHelpers';
+import { postApiJson } from '../utils/apiClient';
 
 interface MicrophoneTranscriberProps {
   onInsertToTts: (transcript: string, autoSynthesize?: boolean) => void;
@@ -52,19 +53,10 @@ export const MicrophoneTranscriber: React.FC<MicrophoneTranscriberProps> = ({
     setErrorMsg(null);
     try {
       const base64Data = await blobToBase64(blob);
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          audioBase64: base64Data,
-          mimeType,
-        }),
+      const data = await postApiJson<{ transcript?: string }>('/api/transcribe', {
+        audioBase64: base64Data,
+        mimeType,
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Gagal mentranskripsi audio.');
-      }
 
       if (!data.transcript) {
         setErrorMsg('Tidak ada ucapan yang terdeteksi dalam rekaman. Silakan coba bicara lebih dekat ke mikrofon.');

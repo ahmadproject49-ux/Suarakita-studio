@@ -20,6 +20,7 @@ import {
   VoicePersona,
   VoiceSliders,
 } from '../utils/audioHelpers';
+import { postApiJson } from '../utils/apiClient';
 
 interface StudioProjectsViewProps {
   personas: VoicePersona[];
@@ -120,21 +121,13 @@ export const StudioProjectsView: React.FC<StudioProjectsViewProps> = ({
     );
 
     try {
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'single',
-          modelChoice: 'flash-lite',
-          text: chapter.text.trim(),
-          voice: persona.baseVoice,
-          style,
-        }),
+      const data = await postApiJson<{ audioBase64: string }>('/api/tts', {
+        mode: 'single',
+        modelChoice: 'flash-lite',
+        text: chapter.text.trim(),
+        voice: persona.baseVoice,
+        style,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || `Gagal merender ${chapter.title}.`);
-      }
 
       const audioUri = `data:audio/wav;base64,${data.audioBase64}`;
       const dur = estimateSpeechSeconds(chapter.text, sliders.speed);

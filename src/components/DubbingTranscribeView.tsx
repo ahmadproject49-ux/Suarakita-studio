@@ -9,6 +9,7 @@ import {
   VoiceSliders,
 } from '../utils/audioHelpers';
 import { MicrophoneTranscriber } from './MicrophoneTranscriber';
+import { postApiJson } from '../utils/apiClient';
 
 interface DubbingTranscribeViewProps {
   personas: VoicePersona[];
@@ -50,21 +51,15 @@ export const DubbingTranscribeView: React.FC<DubbingTranscribeViewProps> = ({
         personas.find((p) => p.id === dubPersonaId) || personas[0];
       const style = buildStyleDirective(persona.defaultStylePrompt, sliders);
 
-      const response = await fetch('/api/dub', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sourceText: sourceScript.trim(),
-          targetLanguage,
-          voice: persona.baseVoice,
-          style,
-        }),
+      const data = await postApiJson<{
+        translatedText: string;
+        audioBase64: string;
+      }>('/api/dub', {
+        sourceText: sourceScript.trim(),
+        targetLanguage,
+        voice: persona.baseVoice,
+        style,
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Gagal menjalankan AI Dubbing.');
-      }
 
       setTranslatedResult(data.translatedText);
       const wavUri = `data:audio/wav;base64,${data.audioBase64}`;

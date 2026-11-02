@@ -38,6 +38,7 @@ import { VoiceLabView } from './components/VoiceLabView';
 import { StudioProjectsView } from './components/StudioProjectsView';
 import { DubbingTranscribeView } from './components/DubbingTranscribeView';
 import { OfflineBanner, PWAInstallCard } from './components/PWAInstallCard';
+import { postApiJson } from './utils/apiClient';
 
 type StudioModule = 'speech' | 'voices' | 'projects' | 'dubbing' | 'history';
 
@@ -215,25 +216,19 @@ export default function App() {
       const effectiveModel: ModelChoice =
         targetMode === 'dialogue' || hasExpressiveTokens ? 'flash-hd' : modelChoice;
 
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: targetMode,
-          modelChoice: effectiveModel,
-          text: targetText,
-          voice: activePersona.baseVoice,
-          style: primaryStyle,
-          secondVoice: secondPersona.baseVoice,
-          secondStyle: secondaryStyle,
-          turns: dialogueTurns,
-        }),
+      const data = await postApiJson<{
+        audioBase64: string;
+        mimeType?: string;
+      }>('/api/tts', {
+        mode: targetMode,
+        modelChoice: effectiveModel,
+        text: targetText,
+        voice: activePersona.baseVoice,
+        style: primaryStyle,
+        secondVoice: secondPersona.baseVoice,
+        secondStyle: secondaryStyle,
+        turns: dialogueTurns,
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Gagal menghasilkan suara.');
-      }
 
       const audioUrl = `data:${data.mimeType || 'audio/wav'};base64,${data.audioBase64}`;
       const nowLabel = new Date().toLocaleTimeString('id-ID', {

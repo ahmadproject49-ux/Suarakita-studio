@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
@@ -9,7 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const VALID_VOICES = new Set(['Kore', 'Puck', 'Charon', 'Fenrir', 'Zephyr']);
 
 function getGenAIClient(): GoogleGenAI {
@@ -380,6 +381,12 @@ async function startServer() {
       const formatted = formatGeminiError(err);
       res.status(formatted.status).json({ error: formatted.message });
     }
+  });
+
+  // Catch-all JSON error handler for /api/* (e.g. PayloadTooLargeError or malformed JSON)
+  app.use('/api', (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const msg = err instanceof Error ? err.message : 'Permintaan API tidak valid.';
+    res.status(400).json({ error: msg });
   });
 
   if (process.env.NODE_ENV !== 'production') {
