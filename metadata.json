@@ -1,0 +1,6 @@
+{
+  "name": "SuaraKita Studio — Text-to-Speech & Transkripsi Suara",
+  "description": "Studio suara interaktif untuk mengubah teks menjadi ucapan alami (Text-to-Speech) satu atau dua pembicara, serta transkripsi rekaman mikrofon secara instan.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
