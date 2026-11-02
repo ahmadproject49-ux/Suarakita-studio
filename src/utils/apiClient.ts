@@ -39,7 +39,7 @@ export async function postApiJson<T = Record<string, unknown>>(
       snippet.toLowerCase().includes('cannot post')
     ) {
       throw new Error(
-        `Layanan API (${endpoint}) tidak ditemukan (HTTP 404). Jika Anda baru saja memperbarui atau mempublikasikan aplikasi, silakan muat ulang (refresh) halaman atau deploy ulang aplikasi agar rute backend aktif.`
+        `Layanan backend (${endpoint}) belum aktif di alamat ini (HTTP 404). Pastikan kode terbaru (termasuk folder /api dan vercel.json) sudah di-push/deploy ulang, serta variabel GEMINI_API_KEY telah ditambahkan di Environment Variables hosting Anda.`
       );
     }
     if (response.status === 502 || response.status === 503 || response.status === 504) {
